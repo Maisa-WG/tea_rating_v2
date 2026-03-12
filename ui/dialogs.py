@@ -39,7 +39,7 @@ def show_prompt_dialog():
 
     col1, col2, col3 = st.columns(3)
     with col2:
-        if st.button("✅ 关闭", type="secondary", use_container_width=True):
+        if st.button("✅ 关闭", type="secondary", width='stretch'):
             st.rerun()
 
 
@@ -108,7 +108,7 @@ def show_basic_cases_dialog(embedder):
                 st.caption(case.get('text', '')[:100] + "...")
 
             with col2:
-                if st.button("✏️ 编辑", key=f"edit_basic_{idx}", use_container_width=True):
+                if st.button("✏️ 编辑", key=f"edit_basic_{idx}", width='stretch'):
                     st.session_state.editing_basic_idx = idx
                     st.rerun()
 
@@ -116,7 +116,7 @@ def show_basic_cases_dialog(embedder):
 
     col1, col2, col3 = st.columns(3)
     with col2:
-        if st.button("✅ 关闭", type="secondary", use_container_width=True):
+        if st.button("✅ 关闭", type="secondary", width='stretch'):
             st.rerun()
 
 
@@ -182,7 +182,7 @@ def show_supp_cases_dialog(embedder):
                 st.caption(case.get('text', '')[:100] + "...")
 
             with col2:
-                if st.button("✏️ 编辑", key=f"edit_supp_{idx}", use_container_width=True):
+                if st.button("✏️ 编辑", key=f"edit_supp_{idx}", width='stretch'):
                     st.session_state.editing_supp_idx = idx
                     st.rerun()
 
@@ -190,7 +190,7 @@ def show_supp_cases_dialog(embedder):
 
     col1, col2, col3 = st.columns(3)
     with col2:
-        if st.button("✅ 关闭", type="secondary", use_container_width=True):
+        if st.button("✅ 关闭", type="secondary", width='stretch'):
             st.rerun()
 
 
@@ -255,12 +255,12 @@ def manage_tea_examples_dialog():
                 st.caption(ex.get('text', '')[:80] + "...")
 
             with col2:
-                if st.button("✏️", key=f"edit_tea_{idx}", use_container_width=True, help="编辑"):
+                if st.button("✏️", key=f"edit_tea_{idx}", width='stretch', help="编辑"):
                     st.session_state.editing_tea_example_idx = idx
                     st.rerun()
 
             with col3:
-                if st.button("🗑️", key=f"del_tea_{idx}", use_container_width=True, help="删除"):
+                if st.button("🗑️", key=f"del_tea_{idx}", width='stretch', help="删除"):
                     examples.pop(idx)
                     ResourceManager.save_tea_examples(examples)
                     st.session_state.tea_examples = examples
@@ -273,19 +273,19 @@ def manage_tea_examples_dialog():
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
-        if st.button("➕ 新增示例", type="primary", use_container_width=True):
+        if st.button("➕ 新增示例", type="primary", width='stretch'):
             st.session_state.editing_tea_example_idx = -1  # -1 表示新增
             st.rerun()
 
     with col2:
-        if st.button("🔄 恢复默认", use_container_width=True):
+        if st.button("🔄 恢复默认", width='stretch'):
             ResourceManager.save_tea_examples(TEA_EXAMPLES)
             st.session_state.tea_examples = TEA_EXAMPLES[:]
             st.success("✅ 已恢复为默认示例")
             st.rerun()
 
     with col4:
-        if st.button("✅ 关闭", type="secondary", use_container_width=True):
+        if st.button("✅ 关闭", type="secondary", width='stretch'):
             st.rerun()
 
 
