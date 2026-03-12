@@ -115,6 +115,116 @@ def create_word_report(results: List[Dict]) -> BytesIO:
 
 
 # ==========================================
+# 文本分割函数（批量评分专用）
+# ==========================================
+
+def split_tea_reviews(text: str, max_length: int = 500) -> List[str]:
+    """
+    将长文本分割成多个独立的茶评条目
+
+    Args:
+        text: 原始文本
+        max_length: 单条茶评的最大长度（字符数）
+
+    Returns:
+        List[str]: 分割后的茶评条目列表
+    """
+    # 清理文本：移除多余的空白字符
+    text = text.strip()
+    text = '\n'.join(line.strip() for line in text.split('\n') if line.strip())
+
+    # 如果文本很短，直接返回
+    if len(text) <= max_length:
+        return [text] if text else []
+
+    reviews = []
+    current_review = ""
+
+    # 按行分割
+    lines = text.split('\n')
+
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+
+        # 如果当前行以特定标记开头（如"茶品"、"样品"等），可能是新的茶评
+        if line.startswith(('茶品', '样品', '品名', '【', '1.', '2.', '3.', '一、', '二、', '三、')):
+            # 保存之前的茶评
+            if current_review:
+                reviews.append(current_review.strip())
+
+            # 开始新的茶评
+            current_review = line
+        else:
+            # 追加到当前茶评
+            if current_review:
+                current_review += " " + line
+            else:
+                current_review = line
+
+        # 检查长度，如果超过最大长度，分割
+        if len(current_review) >= max_length:
+            reviews.append(current_review.strip())
+            current_review = ""
+
+    # 添加最后一个茶评
+    if current_review:
+        reviews.append(current_review.strip())
+
+    # 如果没有成功分割，按段落分割
+    if not reviews:
+        paragraphs = text.split('\n\n')
+        current = ""
+        for para in paragraphs:
+            if len(current) + len(para) <= max_length:
+                current += para + "\n\n"
+            else:
+                if current:
+                    reviews.append(current.strip())
+                current = para + "\n\n"
+        if current:
+            reviews.append(current.strip())
+
+    # 如果仍然没有结果，按固定长度强制分割
+    if not reviews and len(text) > max_length:
+        for i in range(0, len(text), max_length):
+            reviews.append(text[i:i+max_length].strip())
+
+    # 过滤空字符串
+    reviews = [r for r in reviews if r and len(r) > 10]  # 至少10个字符
+
+    return reviews
+
+
+def parse_batch_file(uploaded_file) -> List[str]:
+    """
+    解析批量评分上传的文件，返回茶评条目列表
+
+    Args:
+        uploaded_file: Streamlit UploadedFile 对象
+
+    Returns:
+        List[str]: 茶评条目列表
+    """
+    try:
+        # 解析文件内容
+        text = parse_file(uploaded_file)
+
+        if not text:
+            return []
+
+        # 分割成多个茶评
+        reviews = split_tea_reviews(text)
+
+        return reviews
+
+    except Exception as e:
+        print(f"[ERROR] 批量文件解析失败: {e}")
+        return []
+
+
+# ==========================================
 # 模板下载函数
 # ==========================================
 
