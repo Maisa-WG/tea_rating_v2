@@ -11,42 +11,42 @@ constants.py
 # 六因子专属颜色 (根据香-味-韵三段体验设计)
 FACTOR_COLORS = {
     "优雅性": {
-        "name": "缃色",
+        "name": "",
         "hex": "#F0C75E",
         "rgb": "240, 199, 94",
         "description": "桂花飘香的明黄",
         "category": "香"
     },
     "辨识度": {
-        "name": "竹青",
+        "name": "",
         "hex": "#789262",
         "rgb": "120, 146, 98",
         "description": "新竹的清新绿意",
         "category": "香"
     },
     "协调性": {
-        "name": "檀色",
+        "name": "",
         "hex": "#B36D61",
         "rgb": "179, 109, 97",
         "description": "紫檀木的温润",
         "category": "味"
     },
     "饱和度": {
-        "name": "赭石",
+        "name": "",
         "hex": "#845538",
         "rgb": "132, 85, 56",
         "description": "丹霞地貌的厚重",
         "category": "味"
     },
     "持久性": {
-        "name": "黛蓝",
+        "name": "",
         "hex": "#5B7C99",
         "rgb": "91, 124, 153",
         "description": "远山层叠的青蓝",
         "category": "韵"
     },
     "苦涩度": {
-        "name": "紫檀",
+        "name": "",
         "hex": "#4A3728",
         "rgb": "74, 55, 40",
         "description": "深沉内敛的古木",
@@ -65,10 +65,10 @@ MAIN_COLORS = {
 
 # 评分区间颜色
 SCORE_COLORS = {
-    (9, 10): {"name": "缃色", "hex": "#F0C75E", "level": "卓越"},
+    (9, 10): {"name": "", "hex": "#F0C75E", "level": "卓越"},
     (7, 8): {"name": "柳绿", "hex": "#8CE04E", "level": "优良"},
     (5, 6): {"name": "琥珀", "hex": "#FFB347", "level": "一般"},
-    (3, 4): {"name": "赭石", "hex": "#845538", "level": "待改进"},
+    (3, 4): {"name": "", "hex": "#845538", "level": "待改进"},
     (1, 2): {"name": "朱砂", "hex": "#FF461F", "level": "欠佳"},
 }
 
