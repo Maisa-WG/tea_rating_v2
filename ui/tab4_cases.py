@@ -43,7 +43,7 @@ def _render_basic_cases_panel(embedder):
     """, unsafe_allow_html=True)
 
     # 查看全部按钮
-    if st.button("📋 查看全部", use_container_width=True, key="show_basic"):
+    if st.button("📋 查看全部", width='stretch', key="show_basic"):
         st.session_state.show_basic_cases = True
 
     # 手动添加区域
@@ -77,7 +77,7 @@ def _render_supp_cases_panel(embedder):
     """, unsafe_allow_html=True)
 
     # 查看全部按钮
-    if st.button("📋 查看全部", use_container_width=True, key="show_supp"):
+    if st.button("📋 查看全部", width='stretch', key="show_supp"):
         st.session_state.show_supp_cases = True
 
     # 手动添加区域
@@ -170,10 +170,10 @@ def _render_manual_add_form(case_type: str, embedder):
         col1, col2 = st.columns([1, 1])
 
         with col1:
-            submitted = st.form_submit_button("保存判例", type="primary", use_container_width=True)
+            submitted = st.form_submit_button("保存判例", type="primary", width='stretch')
 
         with col2:
-            if st.form_submit_button("重置", type="secondary", use_container_width=True):
+            if st.form_submit_button("重置", type="secondary", width='stretch'):
                 st.rerun()
 
         if submitted:
@@ -205,13 +205,13 @@ def _render_batch_add_section(case_type: str):
             "判例库导入模板.xlsx",
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             key=f"download_template_{case_type}",
-            use_container_width=True
+            width='stretch'
         )
 
     if bc_file:
         st.success(f"✅ 已选择：{bc_file.name}")
 
-        if st.button("📤 导入判例", key=f"{case_type}_batch_import", type="primary", use_container_width=True):
+        if st.button("📤 导入判例", key=f"{case_type}_batch_import", type="primary", width='stretch'):
             st.info("⚠️ 批量导入功能待完整实现")
 
 
