@@ -135,7 +135,6 @@ tea_rating_v2-main/
 ├── requirements.txt                 # Python 依赖包列表
 ├── sys_p.txt                        # 系统提示词（参考）
 ├── runtime.txt                      # Runtime 配置
-├── visualization.py                 # ⚠️ 旧版可视化文件（已弃用，请使用 utils/visualization.py）
 └── README.md                        # 📖 项目说明文档
 ```
 
