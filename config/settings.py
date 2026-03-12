@@ -61,20 +61,20 @@ COLORS = {
 
 # 六因子专属色（产品系列色）
 FACTOR_COLORS = {
-    "优雅性": {"hex": "#C9B037", "name": "缃色", "series": "芽绿", "desc": "桂花明黄"},
-    "辨识度": {"hex": "#6B8E5A", "name": "竹青", "series": "芽绿", "desc": "新竹绿"},
-    "协调性": {"hex": "#A67B5B", "name": "檀色", "series": "姜黄", "desc": "紫檀木"},
-    "饱和度": {"hex": "#8B6914", "name": "赭石", "series": "姜黄", "desc": "丹霞"},
-    "持久性": {"hex": "#5B7C99", "name": "黛蓝", "series": "云蓝", "desc": "远山青"},
-    "苦涩度": {"hex": "#6B4A3A", "name": "紫檀", "series": "胭脂", "desc": "古木深"},
+    "优雅性": {"hex": "#C9B037", "name": "", "series": "芽绿", "desc": "桂花明黄"},
+    "辨识度": {"hex": "#6B8E5A", "name": "", "series": "芽绿", "desc": "新竹绿"},
+    "协调性": {"hex": "#A67B5B", "name": "", "series": "姜黄", "desc": "紫檀木"},
+    "饱和度": {"hex": "#8B6914", "name": "", "series": "姜黄", "desc": "丹霞"},
+    "持久性": {"hex": "#5B7C99", "name": "", "series": "云蓝", "desc": "远山青"},
+    "苦涩度": {"hex": "#6B4A3A", "name": "", "series": "胭脂", "desc": "古木深"},
 }
 
 # 评分区间色
 SCORE_COLORS = {
-    (9, 10): {"hex": "#C9B037", "name": "缃色", "bg": "#FDF6E3"},
+    (9, 10): {"hex": "#C9B037", "name": "", "bg": "#FDF6E3"},
     (7, 8): {"hex": "#6BAA4A", "name": "柳绿", "bg": "#EDF5EB"},
     (5, 6): {"hex": "#E6A23C", "name": "琥珀", "bg": "#FDF6ED"},
-    (3, 4): {"hex": "#8B6914", "name": "赭石", "bg": "#F5F0E8"},
+    (3, 4): {"hex": "#8B6914", "name": "", "bg": "#F5F0E8"},
     (1, 2): {"hex": "#D9445C", "name": "朱砂", "bg": "#FDF0F2"},
 }
 
