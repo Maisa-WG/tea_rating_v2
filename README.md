@@ -187,7 +187,8 @@ pip install -r requirements.txt
 ```toml
 # 阿里云 Dashscope API Key（用于文本嵌入和向量化）
 ALIYUN_API_KEY = "sk-你的阿里云API密钥"
-
+# DeepSeek API Key (用于 AI 评分)
+# 获取地址: https://platform.deepseek.com/api_keys
 # OpenAI 兼容 API Key（用于文本预处理和推理）
 # 支持多种兼容 OpenAI API 格式的服务
 OPENAI_API_KEY = "sk-你的API密钥"
@@ -203,7 +204,8 @@ OPENAI_BASE_URL = "https://api.openai.com/v1"  # 可选，自定义 API 端点
 
 1. **阿里云 Dashscope**: https://dashscope.console.aliyun.com/apiKey
 2. **OpenAI**: https://platform.openai.com/api-keys
-3. **其他兼容服务**:
+3. # DeepSeek API Key (用于 AI 评分)：获取地址: https://platform.deepseek.com/api_keys
+4. **其他兼容服务**:
    - : https://platform./api_keys
    - 或其他支持 OpenAI API 格式的服务
 
@@ -656,7 +658,7 @@ if 'rebuilt_supp_idx' in st.session_state:
 | **GraphRAG** | `retrieval/graphrag_retriever.py` | 知识图谱增强检索，社区发现算法 |
 | **GitHub 全量同步** | `core/github_sync.py` | 递归遍历、排除模式、Windows 路径修复 |
 | **向量检索** | `storage/vector_store.py` | FAISS 索引，快速相似度搜索 |
-| **向量索引自动重建** | `core/scoring.py` | 自动检测维度不匹配，批量编码并���存索引 |
+| **向量索引自动重建** | `core/scoring.py` | 自动检测维度不匹配，批量编码并保存索引 |
 | **Excel 批量处理** | `data/*_processor.py` | 复用解析器，支持三种判例类型 |
 | **Word 报告生成** | `utils/helpers.py` | 批量评分自动生成 Word 报告 |
 | **Windows 路径修复** | `core/github_sync.py` | 自动将 `\` 转换为 `/`，适配 GitHub |
