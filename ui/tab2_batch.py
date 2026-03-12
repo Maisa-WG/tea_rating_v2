@@ -41,6 +41,6 @@ def render_tab2(embedder, client, client_d, model_id):
         """, unsafe_allow_html=True)
 
         # 批量评分按钮
-        if st.button("批量评分", type="primary", use_container_width=True, disabled=not f):
+        if st.button("批量评分", type="primary", width='stretch', disabled=not f):
             if f:
                 st.info("⚠️ 批量评分功能待完整实现")
