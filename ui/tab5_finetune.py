@@ -153,13 +153,13 @@ def _render_manual_data_section():
             "微调数据模板.xlsx",
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             key="download_ft_template",
-            use_container_width=True
+            width='stretch'
         )
 
     if ft_file:
         st.success(f"✅ 已选择：{ft_file.name}")
 
-        if st.button("📤 导入微调数据", type="primary", key="ft_import", use_container_width=True):
+        if st.button("📤 导入微调数据", type="primary", key="ft_import", width='stretch'):
             st.info("⚠️ 导入功能待完整实现")
 
 
@@ -175,10 +175,10 @@ def _render_auto_fill_section():
     st.caption("💡 自动跳过重复数据")
 
     # 单列布局，两个按钮垂直排列
-    if st.button("➕ 基础判例 → 微调数据", use_container_width=True, key="ft_add_basic"):
+    if st.button("➕ 基础判例 → 微调数据", width='stretch', key="ft_add_basic"):
         st.info("⚠️ 功能待完整实现")
 
-    if st.button("➕ 进阶判例 → 微调数据", use_container_width=True, key="ft_add_supp"):
+    if st.button("➕ 进阶判例 → 微调数据", width='stretch', key="ft_add_supp"):
         st.info("⚠️ 功能待完整实现")
 
 
@@ -230,5 +230,5 @@ def _render_training_section(manager_url: str, server_status: str):
     </style>
     """, unsafe_allow_html=True)
 
-    if st.button("🔥 开始微调", type="primary", disabled=btn_disabled, use_container_width=True, key="start_ft"):
+    if st.button("🔥 开始微调", type="primary", disabled=btn_disabled, width='stretch', key="start_ft"):
         st.info("⚠️ 训练功能待完整实现")
