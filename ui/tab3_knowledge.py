@@ -131,7 +131,7 @@ def _render_upload_section(aliyun_key):
             st.markdown(f"- {file.name} ({file.size / 1024:.1f} KB)")
 
     # 上传按钮 - 始终显示
-    if st.button("📤 添加到知识库", type="primary", use_container_width=True):
+    if st.button("📤 添加到知识库", type="primary", width='stretch'):
         if not up or len(up) == 0:
             st.warning("⚠️ 请先选择要上传的文件")
         else:
@@ -147,13 +147,13 @@ def _render_maintenance_section():
     col1, col2 = st.columns(2)
 
     with col1:
-        if st.button("🔄 刷新文件列表", use_container_width=True):
+        if st.button("🔄 刷新文件列表", width='stretch'):
             st.session_state.local_rag_files = _get_local_files()
             st.success(f"✅ 已刷新文件列表，共 {len(st.session_state.local_rag_files)} 个文件")
             st.rerun()
 
     with col2:
-        if st.button("🗑️ 清空知识库", use_container_width=True):
+        if st.button("🗑️ 清空知识库", width='stretch'):
             try:
                 import shutil
 
