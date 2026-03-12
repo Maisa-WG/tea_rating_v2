@@ -149,10 +149,10 @@ def render_sidebar():
             # 同步按钮和刷新按钮
             col1, col2 = st.columns([3, 1])
             with col1:
-                if st.button("📤 同步到 GitHub", use_container_width=True, key="sync_to_github"):
+                if st.button("📤 同步到 GitHub", width='stretch', key="sync_to_github"):
                     _handle_github_sync()
             with col2:
-                if st.button("🔄", use_container_width=True, help="刷新状态"):
+                if st.button("🔄", width='stretch', help="刷新状态"):
                     st.session_state.github_status_cache['needs_refresh'] = True
                     st.rerun()
 
@@ -166,7 +166,7 @@ def render_sidebar():
             st.markdown(f"<div style='font-size: 0.75rem; color: #999; margin-top: 0.25rem;'>在 .streamlit/secrets.toml 中配置</div>", unsafe_allow_html=True)
 
             # 刷新按钮
-            if st.button("🔄 刷新", use_container_width=True, key="refresh_github_warn"):
+            if st.button("🔄 刷新", width='stretch', key="refresh_github_warn"):
                 st.session_state.github_status_cache['needs_refresh'] = True
                 st.rerun()
 
@@ -188,7 +188,7 @@ def render_sidebar():
         # 茶评示例区域
         st.markdown("**📚 茶评示例**")
 
-        if st.button("茶评示例", use_container_width=True):
+        if st.button("茶评示例", width='stretch'):
             st.session_state.show_tea_examples = True
 
     return embedder, client, client_d, model_id
@@ -219,7 +219,7 @@ def _handle_rag_loading(aliyun_key: str):
     # 情况1：加载失败（最高优先级）
     if loading_status == 'failed':
         st.warning("⚠️ 知识库加载失败")
-        if st.button("🔄 重试加载", type="secondary", use_container_width=True):
+        if st.button("🔄 重试加载", type="secondary", width='stretch'):
             st.session_state.rag_loading_status = 'pending'
             st.session_state.rag_loading_needed = True
             st.rerun()
@@ -237,7 +237,7 @@ def _handle_rag_loading(aliyun_key: str):
         st.caption(f"📊 已加载 {kb_count} 个知识片段")
         st.caption(f"📁 本地 {local_file_count} 个文件")
 
-        if st.button("🔄 重新加载", use_container_width=True):
+        if st.button("🔄 重新加载", width='stretch'):
             st.session_state.rag_loading_status = 'pending'
             st.session_state.rag_loading_needed = True
             st.rerun()
@@ -283,7 +283,7 @@ def _handle_rag_loading(aliyun_key: str):
         # 情况5a：本地有文件，但无索引
         if local_file_count > 0 and not local_index_exists:
             st.info(f"📂 发现本地有 {local_file_count} 个文件")
-            if st.button("📥 加载知识库", type="primary", use_container_width=True):
+            if st.button("📥 加载知识库", type="primary", width='stretch'):
                 st.session_state.rag_loading_needed = True
                 st.session_state.rag_loading_status = 'pending'
                 st.rerun()
