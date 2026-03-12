@@ -214,7 +214,7 @@ def _render_scoring_results(user_input, embedder):
                                 </span>
                             </div>
                             <div class="factor-comment" style="margin-left: 8px;">{d['comment']}</div>
-                            <div class="factor-suggestion" style="margin-left: 8px;">💡 {d.get('suggestion', '')}</div>
+                            <div class="factor-suggestion" style="margin-left: 8px;">💡 {d.get('suggestion') or '暂无建议'}</div>
                         </div>''',
                         unsafe_allow_html=True
                     )
