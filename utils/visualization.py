@@ -39,14 +39,24 @@ def calculate_section_scores(scores):
     将六因子得分为：前调(Top)、中调(Mid)、尾调(Base)
 
     Args:
-        scores: 六因子得分字典
+        scores: 六因子得分字典 (可能是简单格式或嵌套格式)
 
     Returns:
         tuple: (top, mid, base) 三个分数
     """
     # 辅助函数：安全获取分数，默认为 0
     def get(key):
-        return float(scores.get(key, 0))
+        value = scores.get(key, 0)
+
+        # 如果是字典结构，提取 'score' 键
+        if isinstance(value, dict):
+            return float(value.get('score', 0))
+
+        # 如果是数字，直接转换
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return 0.0
 
     top = (get('优雅性') + get('辨识度')) / 2
     mid = (get('协调性') + get('饱和度')) / 2
@@ -180,11 +190,14 @@ def plot_flavor_shape(scores_data):
     ax.axhline(y=1.6, color='#4A5D53', linestyle=':', alpha=0.3, linewidth=1)
     ax.axhline(y=2.4, color='#4A5D53', linestyle=':', alpha=0.3, linewidth=1)
 
-    # 文字标签 - 使用深色
-    font_style = {'ha': 'center', 'va': 'center', 'color': '#4A5D53', 'fontweight': 'bold', 'fontsize': 12}
-    ax.text(0, 2.7, f"香\n{top:.1f}", **font_style)
-    ax.text(0, 2.0, f"味\n{mid:.1f}", **font_style)
-    ax.text(0, 1.3, f"韵\n{base:.1f}", **font_style)
+    # 文字标签 - 根据背景色调整文字颜色
+    font_style_top = {'ha': 'center', 'va': 'center', 'color': '#4A5D53', 'fontweight': 'bold', 'fontsize': 12}
+    font_style_mid = {'ha': 'center', 'va': 'center', 'color': '#4A5D53', 'fontweight': 'bold', 'fontsize': 12}
+    font_style_base = {'ha': 'center', 'va': 'center', 'color': '#F5F5F5', 'fontweight': 'bold', 'fontsize': 12}  # 浅色文字用于深色背景
+
+    ax.text(0, 2.7, f"香\n{top:.1f}", **font_style_top)
+    ax.text(0, 2.0, f"味\n{mid:.1f}", **font_style_mid)
+    ax.text(0, 1.3, f"韵\n{base:.1f}", **font_style_base)
 
     ax.axis('off')
     ax.set_xlim(-10, 10)
