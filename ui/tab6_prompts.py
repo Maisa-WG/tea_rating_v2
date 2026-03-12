@@ -61,15 +61,15 @@ def render_tab6():
         col1, col2, col3 = st.columns(3)
 
         with col1:
-            if st.button("💾 保存修改", type="primary", use_container_width=True, key="save_prompt"):
+            if st.button("💾 保存修改", type="primary", width='stretch', key="save_prompt"):
                 _save_prompt_config(pc, sys_t)
 
         with col2:
-            if st.button("🔄 恢复默认", use_container_width=True, key="restore_prompt"):
+            if st.button("🔄 恢复默认", width='stretch', key="restore_prompt"):
                 _restore_default_prompt()
 
         with col3:
-            if st.button("📄 查看对比", type="primary", use_container_width=True):
+            if st.button("📄 查看对比", type="primary", width='stretch'):
                 _show_prompt_comparison(pc.get('system_template', ''), sys_t)
 
         st.markdown("---")
