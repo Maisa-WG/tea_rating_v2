@@ -71,7 +71,122 @@ def run_scoring(
     if supp_data and len(supp_data) > 0:
         try:
             query_vec = embedder.encode([user_input])
-            if len(query_vec) > 0:
+
+            # 确保查询向量是 numpy 数组
+            import numpy as np
+            if not isinstance(query_vec, np.ndarray):
+                query_vec = np.array(query_vec)
+
+            # 检查维度是否匹配
+            if len(query_vec.shape) == 1:
+                query_vec = query_vec.reshape(1, -1)
+
+            if query_vec.shape[1] != supp_idx.d:
+                print(f"[WARNING] 判例索引维度不匹配：索引 {supp_idx.d}，查询 {query_vec.shape[1]}")
+
+                # 检查是否有缓存的新索引
+                import streamlit as st
+                if 'rebuilt_supp_idx' in st.session_state:
+                    print(f"[INFO] 🚀 使用缓存的新索引（维度: {st.session_state.rebuilt_supp_idx.d}）")
+                    new_idx = st.session_state.rebuilt_supp_idx
+                    D, I = new_idx.search(query_vec, min(c_num, len(supp_data)))
+                    similar_cases = [supp_data[i] for i in I[0] if i < len(supp_data)]
+                    case_context = _format_cases_for_prompt(similar_cases)
+                    case_history = f"参考了 {len(similar_cases)} 条相似判例（使用缓存索引）"
+                else:
+                    print(f"[INFO] 判例数据量：{len(supp_data)} 条")
+                    print(f"[INFO] 重新编码判例数据以匹配当前嵌入器维度...")
+                    print(f"[INFO] 这可能需要一些时间，请耐心等待...")
+
+                # 重新编码所有判例数据
+                import faiss
+                import time
+                start_time = time.time()
+
+                # 分批编码以避免内存问题和API限制
+                batch_size = 8  # 减小批次大小，避免API限流
+                all_embeddings = []
+                failed_batches = []
+
+                for i in range(0, len(supp_data), batch_size):
+                    batch_texts = [item["text"] for item in supp_data[i:i+batch_size]]
+
+                    # 添加重试机制
+                    max_retries = 3
+                    batch_embeddings = None
+                    for retry in range(max_retries):
+                        try:
+                            batch_embeddings = embedder.encode(batch_texts)
+                            break  # 成功则跳出重试循环
+                        except Exception as e:
+                            print(f"[WARNING] 批次 {i//batch_size + 1} 编码失败（重试 {retry+1}/{max_retries}）: {e}")
+                            if retry < max_retries - 1:
+                                import time as time_module
+                                time_module.sleep(2 ** retry)  # 指数退避
+                            else:
+                                failed_batches.append(i//batch_size + 1)
+                                # 使用零向量填充
+                                batch_embeddings = np.zeros((len(batch_texts), query_vec.shape[1]))
+
+                    if batch_embeddings is not None:
+                        all_embeddings.append(batch_embeddings)
+
+                    # 每批都打印进度
+                    print(f"[INFO] 已编码 {min(i+batch_size, len(supp_data))}/{len(supp_data)} 条...")
+
+                    # 避免请求过快
+                    import time as time_module
+                    time_module.sleep(0.5)  # 每批之间暂停0.5秒
+
+                all_embeddings = np.vstack(all_embeddings)
+
+                if not isinstance(all_embeddings, np.ndarray):
+                    all_embeddings = np.array(all_embeddings)
+
+                # 确保是二维数组
+                if len(all_embeddings.shape) == 1:
+                    all_embeddings = all_embeddings.reshape(1, -1)
+
+                # 检查是否有失败的批次
+                if failed_batches:
+                    print(f"[WARNING] 以下批次编码失败，已使用零向量填充: {failed_batches}")
+
+                # 创建新的索引
+                new_idx = faiss.IndexFlatL2(all_embeddings.shape[1])
+                new_idx.add(all_embeddings.astype('float32'))
+
+                encode_time = time.time() - start_time
+                print(f"[INFO] 编码完成，耗时 {encode_time:.2f} 秒")
+
+                # 方案2：缓存到 session_state
+                import streamlit as st
+                st.session_state.supp_cases = (new_idx, supp_data)
+                st.session_state.rebuilt_supp_idx = new_idx  # 额外缓存索引对象
+                print(f"[INFO] ✅ 新索引已缓存到 session_state")
+
+                # 方案1：持久化到文件
+                try:
+                    from config.settings import PATHS
+                    from core.resource_manager import ResourceManager
+                    ResourceManager.save(
+                        new_idx,
+                        supp_data,
+                        PATHS.supp_case_index,
+                        PATHS.supp_case_data,
+                        is_json=True
+                    )
+                    print(f"[INFO] ✅ 新索引已保存到文件 {PATHS.supp_case_index}")
+                    print(f"[INFO] ✅ 新索引已保存到文件 {PATHS.supp_case_data}")
+                    print(f"[INFO] 🎉 重启应用后将自动使用新索引")
+                except Exception as e:
+                    print(f"[WARNING] 索引保存失败: {e}")
+
+                # 使用新索引进行搜索
+                D, I = new_idx.search(query_vec, min(c_num, len(supp_data)))
+                similar_cases = [supp_data[i] for i in I[0] if i < len(supp_data)]
+                case_context = _format_cases_for_prompt(similar_cases)
+                case_history = f"参考了 {len(similar_cases)} 条相似判例（索引已重建并缓存）"
+            elif len(query_vec) > 0:
                 D, I = supp_idx.search(query_vec, min(c_num, len(supp_data)))
                 similar_cases = [supp_data[i] for i in I[0] if i < len(supp_data)]
                 case_context = _format_cases_for_prompt(similar_cases)
