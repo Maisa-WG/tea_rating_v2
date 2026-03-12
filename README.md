@@ -3,7 +3,7 @@
 > 基于大语言模型的智能茶饮感官评分系统 - 模块化重构版
 
 [![Python](https://img.shields.io/badge/Python-3.10-blue)]
-[![Streamlit](https://img.shields.io/badge/Streamlit-1.55-red)]
+[![Streamlit](https://img.shields.io/badge/StreamLit-1.55-red)]
 [![License](https://img.shields.io/badge/License-MIT-green)]
 
 ---
@@ -16,8 +16,8 @@
 
 ### 核心特性
 
-- 🤖 **AI 智能评分**：基于 LLM 的自动化感官评分，支持 GPT-4 和
-- 📚 **知识库管理**：支持 PDF/Word/TXT 文档的知识库构建，GraphRAG 知识图谱增强检索
+- 🤖 **AI 智能评分**：基于 LLM 的自动化感官评分，支持多种主流模型 API
+- 📚 **知识库管理**：支持 PDF/Word/TXT 文��的知识库构建，GraphRAG 知识图谱增强检索
 - 📊 **批量处理**：支持批量茶评文档处理，自动生成评分报告
 - 🔧 **判例库管理**：基础判例和进阶判例的双库管理，向量检索相似案例
 - ⚙️ **模型微调**：支持 LoRA 模型微调，自动启用微调后的模型
@@ -26,6 +26,7 @@
 - 🎨 **茶文化主题 UI**：精心设计的中国风配色和界面，东方美学设计
 - 💡 **Tree of Thoughts**：采用思维树决策模式，多路径评估提升评分准确性
 - 🚀 **性能优化**：session_state 缓存机制，避免重复网络请求，提升响应速度
+- ✨ **智能建议生成**：AI 基于专业知识为每个因子生成个性化改进建议
 
 ---
 
@@ -36,8 +37,7 @@
 - **Python** 3.10 - 编程语言
 
 ### AI & ML
-- **OpenAI API** - GPT-4 模型推理
-- **** - 文本预处理和推理（使用 OpenAI SDK 兼容模式）
+- **OpenAI 兼容 API** - GPT-4 等模型推理
 - **阿里云 Dashscope** - 文本嵌入服务（向量化）
 - **LangChain** - LLM 应用框架
 - **FAISS** - 向量检索引擎
@@ -153,7 +153,6 @@ tea_rating_v2-main/
 | `retrieval/` | 检索和推理 | ⭐⭐ |
 | `tea_data/` | 运行时数据（自动生成） | ⭐ |
 | `.streamlit/` | Streamlit 配置（需手动创建） | ⭐ |
-| `visualization.py` | ⚠️ 旧版，已弃用 | ❌ |
 
 ---
 
@@ -190,17 +189,24 @@ pip install -r requirements.txt
 # 阿里云 Dashscope API Key（用于文本嵌入和向量化）
 ALIYUN_API_KEY = "sk-你的阿里云API密钥"
 
-# （用于文本预处理和推理）
-DEEPSEEK_API_KEY = "sk-你的密钥"
-
-# OpenAI API Key（用于 GPT-4 评分，可选）
-# OPENAI_API_KEY = "sk-你的OpenAI密钥"
+# OpenAI 兼容 API Key（用于文本预处理和推理）
+# 支持多种兼容 OpenAI API 格式的服务
+OPENAI_API_KEY = "sk-你的API密钥"
+OPENAI_BASE_URL = "https://api.openai.com/v1"  # 可选，自定义 API 端点
 
 # GitHub 配置（可选，用于云端全量备份）
 # GITHUB_TOKEN = "你的GitHub令牌"
 # GITHUB_REPO = "用户名/仓库名"
 # GITHUB_BRANCH = "main"
 ```
+
+### 获取 API 密钥
+
+1. **阿里云 Dashscope**: https://dashscope.console.aliyun.com/apiKey
+2. **OpenAI**: https://platform.openai.com/api-keys
+3. **其他兼容服务**:
+   - : https://platform./api_keys
+   - 或其他支持 OpenAI API 格式的服务
 
 ---
 
@@ -231,18 +237,20 @@ streamlit run main.py
 **操作步骤**:
 1. 设置参考知识库数量和判例库数量
 2. 输入茶评描述（支持粘贴茶评文本）
-3. 点击"开始评分"按钮（按钮宽度与输入框一致）
+3. 点击"开始评分"按钮
 4. 查看评分结果：
    - 六因子得分（1-9分）
    - 雷达图可视化
    - 风味形态图（香/味/韵三段）
    - 宗师级总评（东方美学风格）
+   - 每个因子的个性化建议
 5. 可选：校准评分并保存到判例库
 
 **特性**:
 - 支持 Tree of Thoughts 多路径评估
 - 自动文本预处理和规范化
 - 中文完美显示（中国风配色）
+- AI 生成专业改进建议
 - 简洁界面，专注评分体验
 
 ### 2. 批量评分（Tab 2）
@@ -264,7 +272,7 @@ streamlit run main.py
 - 上传新文件到知识库
 - 删除已有文件
 - 自动向量化和索引构建
-- GraphRAG 知识图谱自��生成
+- GraphRAG 知识图谱自动生成
 
 ### 4. 判例库管理（Tab 4）
 
@@ -314,23 +322,24 @@ streamlit run main.py
 系统采用"罗马测评法2.0"，包含以下六个因子：
 
 ### 前段：香
-1. **优雅性** (0-9分) - 香气引发的愉悦感
-2. **辨识度** (0-9分) - 香气可被识别记忆
+1. **优雅性** (1-9分) - 香气引发的愉悦感
+2. **辨识度** (1-9分) - 香气可被识别记忆
 
 ### 中段：味
-3. **协调性** (0-9分) - 茶汤内含物的融合度
-4. **饱和度** (0-9分) - 整体茶汤的浓厚度
+3. **协调性** (1-9分) - 茶汤内含物的融合度
+4. **饱和度** (1-9分) - 整体茶汤的浓厚度
 
 ### 后段：韵
-5. **持久性** (0-9分) - 茶汤在口腔中的余韵
-6. **苦涩度** (0-9分) - 苦味、收敛拉扯感（舒适度越高分数越高）
+5. **持久性** (1-9分) - 茶汤在口腔中的余韵
+6. **苦涩度** (1-9分) - 苦味、收敛拉扯感（舒适度越高分数越高）
 
 ### 评分特点
 
 - **1-9 分制**：更精细的评分粒度
-- **证据驱动**：每个分数都有对应的评论依据
+- **证据驱动**：每个分数都有对应的���论依据
 - **保守原则**：信息不足时默认中性分 4
 - **多路径评估**：Tree of Thoughts 决策模式
+- **智能建议**：AI 基于专业知识生成个性化改进建议
 
 ---
 
@@ -350,7 +359,7 @@ streamlit run main.py
 | `resource_manager.py` | `ResourceManager` | 资源管理器：文件读写、数据持久化、微调数据管理、茶评示例管理 |
 | `github_sync.py` | `GithubSync` | GitHub 同步工具：全量文件同步、递归遍历、排除模式、性能缓存 |
 | `ai_services.py` | `AliyunEmbedder`, `llm_normalize_user_input()` | AI 服务：阿里云嵌入、文本预处理和规范化 |
-| `scoring.py` | `run_scoring()` | 核心评分逻辑：整合 RAG 检索、判例匹配、LLM 推理 |
+| `scoring.py` | `run_scoring()` | 核心评分逻辑：整合 RAG 检索、判例匹配、LLM 推理，支持向量索引自动重建和缓存 |
 | `init.py` | `bootstrap_cases()`, `load_rag_from_github()` | 初始化函数：判例加载、RAG 初始化、GitHub 数据加载 |
 
 ### data/ - 数据处理模块
@@ -382,7 +391,7 @@ streamlit run main.py
 |------|---------|------|
 | `sidebar.py` | `render_sidebar()` | 侧边栏：API 配置检查、模型状态检测、数据统计、性能缓存 |
 | `dialogs.py` | `show_prompt_dialog()`, `show_tea_examples_dialog()`, `manage_tea_examples_dialog()`, `edit_tea_example_dialog()` | 弹窗组件：提示词查看、茶评示例展示和管理、判例编辑 |
-| `tab1_interactive.py` | `render_tab1()` | Tab1 交互评分：单个评分、可视化展示、校准保存 |
+| `tab1_interactive.py` | `render_tab1()` | Tab1 交互评分：单个评分、可视化展示、校准保存、建议显示 |
 | `tab2_batch.py` | `render_tab2()` | Tab2 批量评分：批量处理、Word 报告生成 |
 | `tab3_knowledge.py` | `render_tab3()` | Tab3 知识库管理：文件上传、删除、GraphRAG 同步 |
 | `tab4_cases.py` | `render_tab4()` | Tab4 判例库管理：双库管理、向量检索、Excel 导入 |
@@ -393,7 +402,7 @@ streamlit run main.py
 
 | 文件 | 主要函数 | 说明 |
 |------|---------|------|
-| `visualization.py` | `plot_radar_chart()`, `plot_flavor_shape()`, `calculate_section_scores()` | 可视化函数：雷达图（Plotly）、风味形态图（Matplotlib）、中国风配色、中文字体支持 |
+| `visualization.py` | `plot_radar_chart()`, `plot_flavor_shape()`, `calculate_section_scores()` | 可视化函数：雷达图（Plotly）、风味形态图（Matplotlib）、中国风配色、中文字体支持、嵌套数据结构处理 |
 | `helpers.py` | `parse_pdf()`, `parse_docx()`, `generate_word_report()` | 辅助工具：文件解析、Word 报告生成 |
 
 ### tea_data/ - 数据文件说明
@@ -409,21 +418,6 @@ streamlit run main.py
 | `kb_files.json` | 知识库文件清单 | JSON |
 | `RAG/` | 知识库原始文件 | PDF/TXT/DOCX |
 | `graphrag_artifacts/` | GraphRAG 知识图谱缓存 | JSON/PKL |
-| `helpers.py` | 辅助工具（文件解析、Word 报告生成等） |
-
-### tea_data/ - 数据文件说明
-
-| 文件 | 说明 |
-|------|------|
-| `basic_case.json` | 基础判例库数据 |
-| `supplementary_case.json` | 进阶判例库数据 |
-| `supp_cases.index` | 进阶判例向量索引（FAISS） |
-| `eval_logs.json` | 评分日志记录 |
-| `prompts.json` | 提示词配置存储 |
-| `tea_examples.json` | 茶评示例配置 |
-| `kb_files.json` | 知识库文件清单 |
-| `RAG/` | 知识库原始文件（PDF/TXT/DOCX） |
-| `graphrag_artifacts/` | GraphRAG 知识图谱缓存 |
 
 ---
 
@@ -436,23 +430,14 @@ streamlit run main.py
 ```toml
 # 必需配置
 ALIYUN_API_KEY = "sk-你的阿里云密钥"
-DEEPSEEK_API_KEY = "sk-你的密钥"
-
-# 可选配置（GPT-4 评分）
-# OPENAI_API_KEY = "sk-你的OpenAI密钥"
+OPENAI_API_KEY = "sk-你的OpenAI密钥"
+OPENAI_BASE_URL = "https://api.openai.com/v1"  # 可选
 
 # 可选配置（GitHub 全量备份）
 GITHUB_TOKEN = "你的GitHub令牌"
 GITHUB_REPO = "用户名/仓库名"
 GITHUB_BRANCH = "main"
 ```
-
-### 获取 API 密钥
-
-1. **阿里云 Dashscope**: https://dashscope.console.aliyun.com/apiKey
-2. ****: https://platform./api_keys
-3. **OpenAI**: https://platform.openai.com/api-keys
-4. **GitHub Token**: https://github.com/settings/tokens
 
 ### GraphRAG 配置
 
@@ -523,7 +508,6 @@ from ui.tab1_interactive import render_tab1
 系统采用中国茶文化传统配色：
 
 - **黛绿** `#4A5D53` - 主色调
-- **缃色** `#F0C75E` - 前调（香）
 - **檀色** `#B36D61` - 中调（味）
 - **紫檀** `#4A3728` - 后调（韵）
 - **竹青** `#789262` - 辨识度
@@ -545,7 +529,7 @@ from ui.tab1_interactive import render_tab1
 
 - **东方美学**：简洁、优雅、含蓄
 - **茶文化元素**：茶香、茶味、茶韵三段式设计
-- **传统色彩**：使用中国传统色彩名称
+- **传统色彩**：使用中国传统色彩
 - **对称平衡**：雷达图和风味图的对称设计
 
 ---
@@ -578,7 +562,7 @@ from ui.tab1_interactive import render_tab1
 │  core/ (6 个模块)                                                         │
 │  ├── resource_manager.py      资源管理（文件读写、数据持久化）           │
 │  ├── ai_services.py           AI 服务（嵌入、LLM 调用）                 │
-│  ├── scoring.py               核心评分逻辑（run_scoring）               │
+│  ├── scoring.py               核心评分逻辑（向量索引自动重建）          │
 │  ├── github_sync.py           GitHub 全量同步工具（递归、缓存）          │
 │  └── init.py                  应用初始化（RAG 加载、判例初始化）         │
 └─────────────────────────────────────────────────────────────────────────┘
@@ -610,85 +594,6 @@ from ui.tab1_interactive import render_tab1
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 数据流图
-
-```
-用户输入茶评
-    │
-    ▼
-┌──────────────┐
-│ Streamlit UI │ ◄────── config/settings.py (中国风样式配置)
-└──────┬───────┘
-       │
-       ▼
-┌──────────────────────┐
-│ 核心评分流程          │
-│ (core/scoring.py)    │
-└──────┬───────────────┘
-       │
-       ├──► 文本预处理 ─────► (规范化、清洗)
-       │
-       ├──► 向量化查询 ─────► 阿里云 Dashscope (嵌入向量)
-       │                      │
-       │                      ▼
-       │              ┌──────────────┐
-       │              │ 向量检索      │ ◄── storage/vector_store.py
-       │              │ (FAISS)      │
-       │              └──────────────┘
-       │                      │
-       │                      ▼
-       │              ┌──────────────┐
-       │              │ GraphRAG检索  │ ◄── retrieval/graphrag_retriever.py
-       │              │ (知识图谱)    │
-       │              └──────────────┘
-       │
-       ├──► 评分推理 ─────► OpenAI API / (Tree of Thoughts)
-       │                      │
-       │                      ▼
-       │              ┌──────────────┐
-       │              │  六因子评分   │
-       │              │  (1-9分制)   │
-       │              └──────────────┘
-       │
-       └──► 结果可视化 ──────► utils/visualization.py
-                              │
-                              ▼
-                        ┌──────────┐
-                        │ 雷达图    │ (中国风配色)
-                        │ 风味图    │ (中文显示)
-                        └──────────┘
-```
-
-### 外部依赖
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                   外部服务                               │
-├─────────────────────────────────────────────────────────┤
-│                                                          │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐ │
-│  │  OpenAI API  │  │ 阿里云        │  │  │ │
-│  │  (GPT-4)     │  │  Dashscope   │  │  API         │ │
-│  └──────────────┘  └──────────────┘  └──────────────┘ │
-│         │                  │                 │          │
-│         └──────────────────┴─────────────────┘          │
-│                          │                              │
-└──────────────────────────┼──────────────────────────────┘
-                           │
-                           ▼
-                    ┌──────────────┐
-                    │ 本地应用       │
-                    │ main.py      │
-                    └──────────────┘
-                           │
-                    ┌──────┴──────┐
-                    │             │
-            ┌───────┴─────┐  ┌────┴────────┐
-            │  本地存储    │  │ GitHub 备份 │
-            │  tea_data/  │  │ (全量同步)  │
-            └────────────┘  └─────────────┘
-```
-
 ---
 
 ## 🔍 性能优化
@@ -707,6 +612,11 @@ from ui.tab1_interactive import render_tab1
    - 首次检查：2 秒
    - 有效期：5 分钟
    - 自动更新：超时后重新检查
+
+3. **向量索引缓存**
+   - 自动检测维度不匹配
+   - 缓存重建的索引到 session_state
+   - 避免重复编码（性能提升 10-20 倍）
 
 ### 缓存策略
 
@@ -727,24 +637,32 @@ if cache['needs_refresh']:
     # 执行检查
     # 更新缓存
     cache['needs_refresh'] = False
+
+# 向量索引缓存
+if 'rebuilt_supp_idx' in st.session_state:
+    # 使用缓存的索引，避免重复编码
+    new_idx = st.session_state.rebuilt_supp_idx
 ```
 
 ---
 
-### 关键技术点
+## 🔬 关键技术点
 
 | 技术点 | 实现位置 | 说明 |
 |--------|---------|------|
-| **中国风配色** | `utils/visualization.py` | 使用传统色彩（黛绿、缃色、檀色、紫檀等） |
-| **���文字体支持** | `utils/visualization.py` | matplotlib 字体配置，支持中文显示，避免乱码 |
+| **中国风配色** | `utils/visualization.py` | 使用传统色彩（黛绿、檀色、紫檀等） |
+| **中文字体支持** | `utils/visualization.py` | matplotlib 字体配置，支持中文显示，避免乱码 |
 | **性能缓存** | `ui/sidebar.py` | session_state 缓存 GitHub 状态和模型状态，提升响应速度 |
 | **Tree of Thoughts** | `tea_data/prompts.json` | 多路径评估决策模式，提升评分准确性 |
 | **GraphRAG** | `retrieval/graphrag_retriever.py` | 知识图谱增强检索，社区发现算法 |
 | **GitHub 全量同步** | `core/github_sync.py` | 递归遍历、排除模式、Windows 路径修复 |
 | **向量检索** | `storage/vector_store.py` | FAISS 索引，快速相似度搜索 |
+| **向量索引自动重建** | `core/scoring.py` | 自动检测维度不匹配，批量编码并���存索引 |
 | **Excel 批量处理** | `data/*_processor.py` | 复用解析器，支持三种判例类型 |
 | **Word 报告生成** | `utils/helpers.py` | 批量评分自动生成 Word 报告 |
 | **Windows 路径修复** | `core/github_sync.py` | 自动将 `\` 转换为 `/`，适配 GitHub |
+| **嵌套数据结构处理** | `utils/visualization.py` | 处理 AI 返回的嵌套 JSON 数据结构 |
+| **智能建议生成** | `tea_data/prompts.json` | AI 基于专业知识生成个性化改进建议 |
 
 ---
 
@@ -758,6 +676,16 @@ if cache['needs_refresh']:
 2. **Windows 路径分隔符**：
    - GitHub 同步已修复 Windows 路径问题
    - 自动将 `\` 转换为 `/`
+
+3. **向量索引维度不匹配**：
+   - 当嵌入器模型更换时，可能出现索引维度不匹配
+   - 系统会自动重建索引并缓存，首次重建较慢（1-2分钟）
+   - 后续使用缓存的索引，性能恢复正常
+
+4. **建议生成重复度**：
+   - AI 生成的建议可能存在一定重复度
+   - 已在系统提示词中添加例外条款，允许 AI 在建议字段发挥专业能力
+   - 建议内容基于每个因子的得分情况和专业知识
 
 ---
 
@@ -788,7 +716,6 @@ if cache['needs_refresh']:
 ## 📮 联系方式
 
 如有问题或建议，请提交 Issue 或 Pull Request
-
 
 ---
 
