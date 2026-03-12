@@ -95,7 +95,7 @@ def render_tab1(embedder, client, client_d, model_id):
         """, unsafe_allow_html=True)
 
         # 评分按钮 - 与输入框宽度一致
-        if st.button("开始评分", type="primary", use_container_width=True):
+        if st.button("开始评分", type="primary", width='stretch'):
             if not user_input:
                 st.warning("⚠️ 请输入茶评描述")
             else:
@@ -153,14 +153,24 @@ def _handle_scoring(user_input, embedder, client, client_d, model_id, r_num, c_n
         st.session_state.last_llm_sys_prompt = sent_sys_p
         st.session_state.last_llm_user_prompt = sent_user_p
 
-        # 生成宗师总评
-        master_comment = _generate_master_comment(scores, user_input_clean)
+        # 生成宗师总评 - 修复：提取正确的 scores 数据
+        actual_scores = scores.get('scores', scores) if isinstance(scores, dict) else scores
+        master_comment = _generate_master_comment(actual_scores, user_input_clean)
         st.session_state.last_master_comment = master_comment
 
 
 def _render_scoring_results(user_input, embedder):
     """渲染评分结果 - 升级版"""
-    s = st.session_state.last_scores["scores"]
+
+    # 修复：正确提取嵌套的 scores 数据
+    scores_data = st.session_state.last_scores["scores"]
+
+    # 检查是否有嵌套的 'scores' 键（AI返回的数据结构）
+    if 'scores' in scores_data:
+        s = scores_data['scores']
+    else:
+        s = scores_data
+
     mc = st.session_state.last_master_comment
 
     # 宗师总评区域
@@ -176,7 +186,7 @@ def _render_scoring_results(user_input, embedder):
 
     with left_col:
         st.markdown("##### 📊 风味形态")
-        st.pyplot(plot_flavor_shape(st.session_state.last_scores), use_container_width=True)
+        st.pyplot(plot_flavor_shape(s), width='stretch')
 
     with right_col:
         st.markdown("##### 🏷️ 六因子评分")
@@ -196,16 +206,15 @@ def _render_scoring_results(user_input, embedder):
                     st.markdown(
                         f'''<div class="{card_class}">
                             <div class="factor-header">
-                                <span class="factor-name">
-                                    <span style="color: {factor_color};">{f}</span>
-                                    <span style="font-size: 0.75rem; color: #999; margin-left: 4px;">{factor_name_cn}</span>
-                                </span>
-                                <span class="factor-score" style="background-color: {score_hex}; color: white;">
-                                    {d['score']}/9
+                                <span class="factor-name" style="display: flex; align-items: baseline;">
+                                    <span style="color: {factor_color}; margin-left: 4px;">{f}</span>
+                                    <span style="background-color: {factor_color}; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; margin-left: 6px;">
+                                        {d['score']}/9
+                                    </span>
                                 </span>
                             </div>
-                            <div class="factor-comment">{d['comment']}</div>
-                            <div class="factor-suggestion">💡 {d.get('suggestion', '')}</div>
+                            <div class="factor-comment" style="margin-left: 8px;">{d['comment']}</div>
+                            <div class="factor-suggestion" style="margin-left: 8px;">💡 {d.get('suggestion', '')}</div>
                         </div>''',
                         unsafe_allow_html=True
                     )
@@ -260,36 +269,42 @@ def _render_calibration_ui(user_input, embedder, s, mc):
                         label_visibility="collapsed"
                     )
 
+                # 添加评语输入框
+                comment_value = st.text_area(
+                    "评语",
+                    s[f]['comment'],
+                    key=f"c_{f}_{v}",
+                    height=70,
+                    placeholder="评语",
+                    label_visibility="collapsed"
+                )
+
+                # 添加建议输入框
+                suggestion_value = st.text_area(
+                    "建议",
+                    s[f].get('suggestion', ''),
+                    key=f"sg_{f}_{v}",
+                    height=60,
+                    placeholder="建议",
+                    label_visibility="collapsed"
+                )
+
                 cal_scores[f] = {
                     "score": new_score,
-                    "comment": st.text_area(
-                        "评语",
-                        s[f]['comment'],
-                        key=f"c_{f}_{v}",
-                        height=70,
-                        placeholder="评语",
-                        label_visibility="collapsed"
-                    ),
-                    "suggestion": st.text_area(
-                        "建议",
-                        s[f].get('suggestion', ''),
-                        key=f"sg_{f}_{v}",
-                        height=60,
-                        placeholder="建议",
-                        label_visibility="collapsed"
-                    )
+                    "comment": comment_value,
+                    "suggestion": suggestion_value
                 }
 
     # 保存按钮
     st.markdown("---")
 
-    col1, col2, col3 = st.columns([2, 2, 1])
+    col1, col2 = st.columns(2)
     with col1:
-        if st.button("💾 保存校准评分", type="primary"):
+        if st.button("💾 保存校准评分", type="primary", width='stretch'):
             _save_calibrated_score(user_input, cal_scores, cal_master, embedder)
 
     with col2:
-        if st.button("🔄 重置校准"):
+        if st.button("🔄 重置校准", width='stretch'):
             st.session_state.score_version += 1
             st.rerun()
 
@@ -297,6 +312,10 @@ def _render_calibration_ui(user_input, embedder, s, mc):
 def _save_calibrated_score(user_input, cal_scores, cal_master, embedder):
     """保存校准后的评分"""
     import time
+    import numpy as np
+    import faiss
+    from config.settings import PATHS
+    from core.resource_manager import ResourceManager
 
     nc = {
         "text": user_input,
@@ -307,20 +326,80 @@ def _save_calibrated_score(user_input, cal_scores, cal_master, embedder):
 
     # 保存到进阶判例
     supp_idx, supp_data = st.session_state.supp_cases
-    supp_data.append(nc)
-    supp_idx.add(embedder.encode([user_input]))
-    st.session_state.supp_cases = (supp_idx, supp_data)
 
-    from config.settings import PATHS
-    from core.resource_manager import ResourceManager
+    # 编码文本为嵌入向量
+    embedding = embedder.encode([user_input])
 
-    ResourceManager.save(
-        supp_idx,
-        supp_data,
-        PATHS.supp_case_index,
-        PATHS.supp_case_data,
-        is_json=True
-    )
+    # 确保嵌入向量是 numpy 数组并且是二维的
+    if not isinstance(embedding, np.ndarray):
+        embedding = np.array(embedding)
+
+    # 如果是一维数组，转换为二维
+    if len(embedding.shape) == 1:
+        embedding = embedding.reshape(1, -1)
+
+    # 检查维度是否匹配
+    if embedding.shape[1] != supp_idx.d:
+        st.warning(f"⚠️ 嵌入向量维度不匹配，重新创建索引")
+
+        # 重新创建索引
+        new_dim = embedding.shape[1]
+
+        # 如果有现有数据，重新编码所有数据
+        if len(supp_data) > 0:
+            all_texts = [item["text"] for item in supp_data] + [user_input]
+            all_embeddings = embedder.encode(all_texts)
+
+            if not isinstance(all_embeddings, np.ndarray):
+                all_embeddings = np.array(all_embeddings)
+
+            # 创建新的索引
+            new_idx = faiss.IndexFlatL2(new_dim)
+            new_idx.add(all_embeddings.astype('float32'))
+
+            # 添加新数据
+            supp_data.append(nc)
+
+            # 更新 session_state
+            st.session_state.supp_cases = (new_idx, supp_data)
+
+            # 保存到文件
+            ResourceManager.save(
+                new_idx,
+                supp_data,
+                PATHS.supp_case_index,
+                PATHS.supp_case_data,
+                is_json=True
+            )
+        else:
+            # 如果没有现有数据，直接创建新索引
+            new_idx = faiss.IndexFlatL2(new_dim)
+            new_idx.add(embedding.astype('float32'))
+            supp_data.append(nc)
+            st.session_state.supp_cases = (new_idx, supp_data)
+
+            # 保存到文件
+            ResourceManager.save(
+                new_idx,
+                supp_data,
+                PATHS.supp_case_index,
+                PATHS.supp_case_data,
+                is_json=True
+            )
+    else:
+        # 维度匹配，直接添加
+        supp_data.append(nc)
+        supp_idx.add(embedding.astype('float32'))
+        st.session_state.supp_cases = (supp_idx, supp_data)
+
+        # 保存到文件
+        ResourceManager.save(
+            supp_idx,
+            supp_data,
+            PATHS.supp_case_index,
+            PATHS.supp_case_data,
+            is_json=True
+        )
 
     st.success("✅ 校准已保存到进阶判例")
     st.session_state.score_version += 1
