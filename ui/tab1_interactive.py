@@ -28,9 +28,26 @@ def render_tab1(embedder, client, client_d, model_id):
         st.info("💡 将参考知识库与判例库进行评分。确认结果可更新判例库。")
 
         # 参数设置区域
-        c1, c2, c3, c4, c5 = st.columns([1, 3, 1, 3, 1])
-        r_num = c2.number_input("参考知识库条目数量", 1, 20, 3, key="r1")
-        c_num = c4.number_input("参考进阶判例条目数量", 1, 20, 5, key="c1")
+        c1, c2, c3, c4, c5, c6, c7 = st.columns([1, 3, 1, 3, 1, 3, 1])
+        rating_model = c2.selectbox(
+            "选择评分模型",
+            options=[
+                "Qwen-8B （自部署小模型，可微调）",
+                "DeepSeek-chat （DeepSeek最新通用模型）",
+                "DeepSeek-reasoner （DeepSeek推理模型）",
+            ],
+            index=0,
+            key="rating_model"
+        )
+        model_map = {
+            "Qwen-8B （自部署小模型，可微调）": "Qwen-8B",
+            "DeepSeek-chat （DeepSeek最新通用模型）": "deepseek-chat",
+            "DeepSeek-reasoner （DeepSeek推理模型）": "deepseek-reasoner",
+        }
+        selected_model_id = model_map[rating_model]
+        
+        r_num = c4.number_input("参考知识库条目数量", 1, 20, 3, key="r1")
+        c_num = c6.number_input("参考进阶判例条目数量", 1, 20, 5, key="c1")
 
         # 用户输入区域
         if 'current_user_input' not in st.session_state:
