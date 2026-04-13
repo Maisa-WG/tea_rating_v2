@@ -34,7 +34,7 @@ def render_tab1(embedder, client, client_d, model_id):
             options=[
                 "Qwen-8B （自部署小模型，可微调）",
                 "DeepSeek-chat （DeepSeek最新通用模型）",
-                "DeepSeek-reasoner （DeepSeek推理模型）",
+                "DeepSeek-reasoner （暂不可用）",
             ],
             index=0,
             key="rating_model"
