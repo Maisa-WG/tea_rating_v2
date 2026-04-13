@@ -93,7 +93,7 @@ def render_tab1(embedder, client, client_d, model_id):
             if not user_input:
                 st.warning("⚠️ 请输入茶评描述")
             else:
-                _handle_scoring(user_input, embedder, client, client_d, model_id, r_num, c_num)
+                _handle_scoring(user_input, embedder, client, client_d, model_id, selected_model_id, r_num, c_num)
 
         # 查看提示词按钮 - 在评分按钮下方
         if st.session_state.get('last_llm_sys_prompt') or st.session_state.get('last_llm_user_prompt'):
@@ -108,7 +108,7 @@ def render_tab1(embedder, client, client_d, model_id):
             _render_scoring_results(scored_input, embedder)
 
 
-def _handle_scoring(user_input, embedder, client, client_d, model_id, r_num, c_num):
+def _handle_scoring(user_input, embedder, client, client_d, model_id, selected_model_id, r_num, c_num):
     """Handle scoring logic - Single line dynamic status display"""
     import time
     import threading
@@ -117,11 +117,21 @@ def _handle_scoring(user_input, embedder, client, client_d, model_id, r_num, c_n
     from core.ai_services import llm_normalize_user_input
     from core.scoring import run_scoring
 
+    # 根据用户选择的评分模型，决定使用哪个 client 和 model_id
+    if selected_model_id in ("deepseek-chat", "deepseek-reasoner"):
+        scoring_client = client_d       # 使用 DeepSeek 客户端
+        scoring_model_id = selected_model_id
+    else:
+        scoring_client = client          # 使用自部署 Qwen 客户端
+        scoring_model_id = model_id      # 使用侧边栏配置的 model_id
+
+    display_model_name = selected_model_id  # 用于状态栏展示
+
     # Create status placeholder (single line, no collapse)
     status_placeholder = st.empty()
 
     # Stage 1: Preprocessing
-    status_placeholder.info(f"🍵 正在使用 {model_id} 品鉴... 📝 正在预处理茶评内容...")
+    status_placeholder.info(f"🍵 正在使用 {display_model_name} 品鉴... 📝 正在预处理茶评内容...")
 
     try:
         user_input_clean = llm_normalize_user_input(user_input, client_d)
@@ -130,7 +140,7 @@ def _handle_scoring(user_input, embedder, client, client_d, model_id, r_num, c_n
         return
 
     # Stage 2: Load knowledge base
-    status_placeholder.info(f"🍵 正在使用 {model_id} 品鉴... 🔍 正在加载知识库与判例...")
+    status_placeholder.info(f"🍵 正在使用 {display_model_name} 品鉴... 🔍 正在加载知识库与判例...")
 
     try:
         kb = st.session_state.kb
@@ -154,8 +164,8 @@ def _handle_scoring(user_input, embedder, client, client_d, model_id, r_num, c_n
                 supp_cases=supp_cases,
                 prompt_config=prompt_config,
                 embedder=embedder,
-                client=client,
-                model_id=model_id,
+                client=scoring_client,
+                model_id=scoring_model_id,
                 r_num=r_num,
                 c_num=c_num
             )
@@ -206,7 +216,7 @@ def _handle_scoring(user_input, embedder, client, client_d, model_id, r_num, c_n
 
         # Display current stage (no loop, progressive)
         status_placeholder.info(
-            f"🍵 正在使用 {model_id} 品鉴... {thinking_stages[current_stage_idx][1]}"
+            f"🍵 正在使用 {display_model_name} 品鉴... {thinking_stages[current_stage_idx][1]}"
         )
 
         # Wait before checking again
