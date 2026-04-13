@@ -142,19 +142,40 @@ def run_scoring(
     max_retries = 2
     timeout = 60
 
+    # 判断是否为 DeepSeek-reasoner（不支持 temperature / response_format / system role）
+    is_reasoner = (model_id == "deepseek-reasoner")
+
     for attempt in range(max_retries):
         try:
-            response = client.chat.completions.create(
-                model=model_id,
-                messages=[
-                    {"role": "system", "content": sys_prompt},
-                    {"role": "user", "content": user_prompt}
-                ],
-                temperature=0.3,
-                max_tokens=2000,
-                timeout=timeout,
-                response_format={"type": "json_object"}
-            )
+            if is_reasoner:
+                # DeepSeek-reasoner: 不支持 temperature、response_format，
+                # 且 system 消息需要放在 user 消息中
+                combined_prompt = (
+                    f"[系统指令]\n{sys_prompt}\n\n"
+                    f"[用户输入]\n{user_prompt}\n\n"
+                    "请严格以 JSON 格式返回结果，不要包含任何其他内容。"
+                )
+                response = client.chat.completions.create(
+                    model=model_id,
+                    messages=[
+                        {"role": "user", "content": combined_prompt}
+                    ],
+                    max_tokens=4000,
+                    timeout=timeout,
+                )
+            else:
+                # Qwen-8B / DeepSeek-chat: 标准 OpenAI 兼容调用
+                response = client.chat.completions.create(
+                    model=model_id,
+                    messages=[
+                        {"role": "system", "content": sys_prompt},
+                        {"role": "user", "content": user_prompt}
+                    ],
+                    temperature=0.3,
+                    max_tokens=2000,
+                    timeout=timeout,
+                    response_format={"type": "json_object"}
+                )
 
             content = response.choices[0].message.content
 
