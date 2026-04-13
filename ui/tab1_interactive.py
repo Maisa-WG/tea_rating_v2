@@ -28,7 +28,7 @@ def render_tab1(embedder, client, client_d, model_id):
         st.info("💡 将参考知识库与判例库进行评分。确认结果可更新判例库。")
 
         # 参数设置区域
-        c1, c2, c3, c4, c5, c6, c7 = st.columns([1, 3, 1, 3, 1, 3, 1])
+        c1, c2, c3, c4, c5, c6, c7 = st.columns([1, 10, 1, 6, 1, 6, 1])
         rating_model = c2.selectbox(
             "选择评分模型",
             options=[
