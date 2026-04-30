@@ -46,8 +46,8 @@ def render_tab1(embedder, client, client_d, model_id):
         }
         selected_model_id = model_map[rating_model]
         
-        r_num = c4.number_input("参考知识库条目数量", 1, 20, 3, key="r1")
-        c_num = c6.number_input("参考进阶判例条目数量", 1, 20, 5, key="c1")
+        r_num = c4.number_input("参考知识库条目数量", 2, 5, 3, key="r1")
+        c_num = c6.number_input("参考进阶判例条目数量", 2, 10, 5, key="c1")
 
         # 用户输入区域
         if 'current_user_input' not in st.session_state:
