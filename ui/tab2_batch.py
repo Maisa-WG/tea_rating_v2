@@ -25,8 +25,8 @@ def render_tab2(embedder, client, client_d, model_id):
 
         # 参数设置区域
         c1, c2, c3, c4, c5 = st.columns([1, 3, 1, 3, 1])
-        r_num = c2.number_input("参考知识库条目数量", 1, 20, 3, key="rb")
-        c_num = c4.number_input("参考进阶判例条目数量", 1, 20, 5, key="cb")
+        r_num = c2.number_input("参考知识库条目数量", 2, 5, 3, key="rb")
+        c_num = c4.number_input("参考进阶判例条目数量", 2, 10, 5, key="cb")
 
         # 文件上传区域
         f = st.file_uploader(
